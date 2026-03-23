@@ -3,11 +3,14 @@
  */
 
 import { DiscType, DiscSide, getDiscStyle, TOOLBOX_DISC_RADIUS, drawDiscShape } from './disc.js';
+import { isDark } from './theme.js';
 
 export const TOOLBOX_WIDTH = 80;
-const TOOLBOX_BG = '#EEF2F7';
-const TOOLBOX_BORDER = '#CBD5E1';
-const TOOLBOX_LABEL_COLOR = '#94A3B8';
+
+const THEME = {
+  light: { bg: '#EEF2F7', border: '#CBD5E1', label: '#94A3B8' },
+  dark:  { bg: '#1E293B', border: '#334155', label: '#64748B' },
+};
 const TOOLBOX_PADDING_TOP = 18;
 const TOOLBOX_GAP = 18;
 
@@ -47,12 +50,15 @@ export function hitTestToolbox(screenX, screenY) {
 
 /** Draw the toolbox strip. */
 export function drawToolbox(ctx, canvasHeight) {
+  const t = isDark() ? THEME.dark : THEME.light;
+  const dark = isDark();
+
   // Background
-  ctx.fillStyle = TOOLBOX_BG;
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, TOOLBOX_WIDTH, canvasHeight);
 
   // Right border
-  ctx.strokeStyle = TOOLBOX_BORDER;
+  ctx.strokeStyle = t.border;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(TOOLBOX_WIDTH, 0);
@@ -60,7 +66,7 @@ export function drawToolbox(ctx, canvasHeight) {
   ctx.stroke();
 
   // Label
-  ctx.fillStyle = TOOLBOX_LABEL_COLOR;
+  ctx.fillStyle = t.label;
   ctx.font = '12px ' + "'Cambria Math', Cambria, serif";
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
@@ -68,7 +74,7 @@ export function drawToolbox(ctx, canvasHeight) {
 
   // Discs
   for (const item of toolboxPositions) {
-    const style = getDiscStyle(item.type, item.side);
+    const style = getDiscStyle(item.type, item.side, dark);
     drawDiscShape(ctx, item.cx, item.cy, TOOLBOX_DISC_RADIUS, style);
   }
 }

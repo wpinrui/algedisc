@@ -4,8 +4,10 @@
 
 import { getDiscStyle, DISC_RADIUS, drawDiscShape } from './disc.js';
 import { drawToolbox, TOOLBOX_WIDTH } from './toolbox.js';
+import { isDark } from './theme.js';
 
-const WS_BG = '#F8FAFB';
+const WS_BG_LIGHT = '#F8FAFB';
+const WS_BG_DARK = '#0F172A';
 
 let canvas, ctx;
 let dirty = true;
@@ -62,8 +64,10 @@ function draw() {
   const w = canvas.width / devicePixelRatio;
   const h = canvas.height / devicePixelRatio;
 
+  const dark = isDark();
+
   // Clear
-  ctx.fillStyle = WS_BG;
+  ctx.fillStyle = dark ? WS_BG_DARK : WS_BG_LIGHT;
   ctx.fillRect(0, 0, w, h);
 
   // Draw workspace discs (in world space, offset by viewport)
@@ -80,14 +84,14 @@ function draw() {
       continue;
     }
 
-    const style = getDiscStyle(disc.type, disc.side);
+    const style = getDiscStyle(disc.type, disc.side, dark);
     drawDiscShape(ctx, sx, sy, DISC_RADIUS, style);
   }
 
   // Draw drag ghost (disc being dragged from toolbox)
   const ghost = getDragGhost ? getDragGhost() : null;
   if (ghost) {
-    const style = getDiscStyle(ghost.type, ghost.side);
+    const style = getDiscStyle(ghost.type, ghost.side, dark);
     ctx.globalAlpha = 0.85;
     drawDiscShape(ctx, ghost.screenX, ghost.screenY, DISC_RADIUS, style);
     ctx.globalAlpha = 1;
