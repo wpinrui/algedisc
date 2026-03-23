@@ -6,8 +6,8 @@ import {
   createState, addDisc, moveDisc, moveSelectedDiscs, flipDiscById,
   bringToFront, setViewport, hitTestDisc, getDiscCount,
   selectDisc, deselectDisc, toggleSelectDisc, setSelection,
-  clearSelection, isSelected, selectDiscsInRect, deleteSelected,
-  toggleGrid,
+  clearSelection, isSelected, selectionSize, selectDiscsInRect,
+  deleteSelected, toggleGrid,
 } from './workspace.js';
 import {
   initCanvas, markDirty, startRenderLoop,
@@ -127,7 +127,7 @@ function onMouseDown(e) {
     return;
   }
   if (tbHit === 'delete') {
-    if (state.selection.size > 0) {
+    if (selectionSize(state) > 0) {
       setState(deleteSelected(state));
     }
     return;
@@ -161,7 +161,7 @@ function onMouseDown(e) {
       return;
     }
 
-    if (isSelected(state, disc.id) && state.selection.size > 1) {
+    if (isSelected(state, disc.id) && selectionSize(state) > 1) {
       // Drag selected group
       mode = Mode.DRAGGING_SELECTION;
       bulkDragStartWorld = { x: world.x, y: world.y };
@@ -185,7 +185,7 @@ function onMouseDown(e) {
   // Empty space → marquee
   mode = Mode.MARQUEE;
   marqueeCtrlHeld = e.ctrlKey;
-  marqueePreSelection = marqueeCtrlHeld ? [...state.selection] : [];
+  marqueePreSelection = marqueeCtrlHeld ? Object.keys(state.selection).map(Number) : [];
   marquee = { x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y };
   if (!marqueeCtrlHeld) {
     setState(clearSelection(state));
@@ -263,7 +263,7 @@ function onMouseMove(e) {
     const w2 = screenToWorld(marquee.x2, marquee.y2);
     const idsInRect = selectDiscsInRect(state, w1.x, w1.y, w2.x, w2.y);
     const combined = marqueeCtrlHeld
-      ? [...new Set([...marqueePreSelection, ...idsInRect])]
+      ? [...new Set([...marqueePreSelection, ...idsInRect])]  // deduplicate
       : idsInRect;
     setState(setSelection(state, combined));
     markDirty();
@@ -333,7 +333,8 @@ function onMouseUp(e) {
     if (state.gridEnabled) {
       // Snap all selected discs on drop
       let s = state;
-      for (const id of state.selection) {
+      for (const idStr of Object.keys(state.selection)) {
+        const id = Number(idStr);
         const disc = s.discs.find(d => d.id === id);
         if (disc) {
           const snapped = snapToGrid(disc.x, disc.y);
@@ -366,7 +367,7 @@ function onMouseUp(e) {
 
 function onKeyDown(e) {
   if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (state.selection.size > 0) {
+    if (selectionSize(state) > 0) {
       e.preventDefault();
       setState(deleteSelected(state));
     }
@@ -380,7 +381,7 @@ function onContextMenu(e) {
 // ── Status bar ──
 function updateStatus() {
   const count = getDiscCount(state);
-  const sel = state.selection.size;
+  const sel = selectionSize(state);
   const leftEl = document.getElementById('status-left');
   const rightEl = document.getElementById('status-right');
   if (leftEl) leftEl.textContent = state.gridEnabled ? 'Grid: On' : '';

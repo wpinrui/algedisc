@@ -95,7 +95,7 @@ function draw() {
     }
 
     // Selection ring (drawn behind disc body)
-    if (state.selection.has(disc.id)) {
+    if (state.selection[disc.id]) {
       drawSelectionRing(ctx, sx, sy, DISC_RADIUS);
     }
 

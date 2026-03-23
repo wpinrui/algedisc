@@ -64,7 +64,7 @@ export function drawToolbar(ctx, canvasWidth, state) {
   const t = dark ? THEME.dark : THEME.light;
   const tb = getToolbarRect(canvasWidth);
   const btns = getButtonRects(canvasWidth);
-  const hasSelection = state.selection.size > 0;
+  const hasSelection = Object.keys(state.selection).length > 0;
 
   // Toolbar background
   ctx.fillStyle = t.bg;
