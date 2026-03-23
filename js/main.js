@@ -122,6 +122,26 @@ function onMouseDown(e) {
   }
 }
 
+function updateCursor(pos) {
+  if (mode === Mode.DRAGGING_DISC || mode === Mode.DRAGGING_FROM_TOOLBOX) {
+    canvasEl.style.cursor = 'grabbing';
+    return;
+  }
+  if (mode === Mode.PANNING) {
+    canvasEl.style.cursor = 'move';
+    return;
+  }
+  // Idle — check what's under the cursor
+  if (pos.x <= TOOLBOX_WIDTH) {
+    const hit = hitTestToolbox(pos.x, pos.y);
+    canvasEl.style.cursor = hit ? 'grab' : 'default';
+    return;
+  }
+  const world = screenToWorld(pos.x, pos.y);
+  const disc = hitTestDisc(state, world.x, world.y);
+  canvasEl.style.cursor = disc ? 'grab' : 'default';
+}
+
 function onMouseMove(e) {
   const pos = getMousePos(e);
 
@@ -135,12 +155,14 @@ function onMouseMove(e) {
   if (mode === Mode.DRAGGING_FROM_TOOLBOX && dragGhost) {
     dragGhost = { ...dragGhost, screenX: pos.x, screenY: pos.y };
     markDirty();
+    updateCursor(pos);
     return;
   }
 
   if (mode === Mode.DRAGGING_DISC && dragDiscId != null) {
     const world = screenToWorld(pos.x, pos.y);
     setState(moveDisc(state, dragDiscId, world.x + dragOffsetX, world.y + dragOffsetY));
+    updateCursor(pos);
     return;
   }
 
@@ -148,8 +170,12 @@ function onMouseMove(e) {
     const pdx = pos.x - panStartX;
     const pdy = pos.y - panStartY;
     setState(setViewport(state, panStartVX + pdx, panStartVY + pdy));
+    updateCursor(pos);
     return;
   }
+
+  // Idle hover
+  updateCursor(pos);
 }
 
 function onMouseUp(e) {
@@ -164,6 +190,7 @@ function onMouseUp(e) {
     dragGhost = null;
     mode = Mode.IDLE;
     markDirty();
+    updateCursor(pos);
     return;
   }
 
@@ -183,11 +210,13 @@ function onMouseUp(e) {
     }
     dragDiscId = null;
     mode = Mode.IDLE;
+    updateCursor(pos);
     return;
   }
 
   if (mode === Mode.PANNING) {
     mode = Mode.IDLE;
+    updateCursor(pos);
     return;
   }
 }
