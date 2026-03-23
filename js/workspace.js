@@ -9,6 +9,8 @@ export function createState() {
     discs: [],
     viewport: { x: 0, y: 0 },
     nextId: 1,
+    selection: new Set(),
+    gridEnabled: false,
   };
 }
 
@@ -63,6 +65,77 @@ export function hitTestDisc(state, wx, wy) {
     }
   }
   return null;
+}
+
+// ── Selection ──
+
+export function selectDisc(state, id) {
+  const sel = new Set(state.selection);
+  sel.add(id);
+  return { ...state, selection: sel };
+}
+
+export function deselectDisc(state, id) {
+  const sel = new Set(state.selection);
+  sel.delete(id);
+  return { ...state, selection: sel };
+}
+
+export function toggleSelectDisc(state, id) {
+  const sel = new Set(state.selection);
+  if (sel.has(id)) sel.delete(id); else sel.add(id);
+  return { ...state, selection: sel };
+}
+
+export function setSelection(state, ids) {
+  return { ...state, selection: new Set(ids) };
+}
+
+export function clearSelection(state) {
+  return { ...state, selection: new Set() };
+}
+
+export function isSelected(state, id) {
+  return state.selection.has(id);
+}
+
+export function getSelectedIds(state) {
+  return [...state.selection];
+}
+
+/** Select all discs whose center falls within the given world-space rect. */
+export function selectDiscsInRect(state, x1, y1, x2, y2) {
+  const minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
+  const minY = Math.min(y1, y2), maxY = Math.max(y1, y2);
+  const ids = state.discs
+    .filter(d => d.x >= minX && d.x <= maxX && d.y >= minY && d.y <= maxY)
+    .map(d => d.id);
+  return ids;
+}
+
+// ── Bulk operations ──
+
+export function moveSelectedDiscs(state, dx, dy) {
+  return {
+    ...state,
+    discs: state.discs.map(d =>
+      state.selection.has(d.id) ? { ...d, x: d.x + dx, y: d.y + dy } : d
+    ),
+  };
+}
+
+export function deleteSelected(state) {
+  return {
+    ...state,
+    discs: state.discs.filter(d => !state.selection.has(d.id)),
+    selection: new Set(),
+  };
+}
+
+// ── Grid ──
+
+export function toggleGrid(state) {
+  return { ...state, gridEnabled: !state.gridEnabled };
 }
 
 export function getDiscCount(state) {

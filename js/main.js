@@ -3,16 +3,21 @@
  */
 
 import {
-  createState, addDisc, moveDisc, flipDiscById,
+  createState, addDisc, moveDisc, moveSelectedDiscs, flipDiscById,
   bringToFront, setViewport, hitTestDisc, getDiscCount,
+  selectDisc, deselectDisc, toggleSelectDisc, setSelection,
+  clearSelection, isSelected, selectDiscsInRect, deleteSelected,
+  toggleGrid,
 } from './workspace.js';
 import {
   initCanvas, markDirty, startRenderLoop,
-  setStateProvider, setDragGhostProvider,
+  setStateProvider, setDragGhostProvider, setMarqueeProvider,
 } from './canvas.js';
 import { hitTestToolbox, TOOLBOX_WIDTH } from './toolbox.js';
+import { hitTestToolbar, getToolbarCanvasWidth } from './toolbar.js';
 import { DISC_RADIUS } from './disc.js';
 import { initTheme, toggle as toggleTheme, isDark, onChange as onThemeChange } from './theme.js';
+import { snapToGrid } from './grid.js';
 
 // ── State ──
 let state = createState();
@@ -28,6 +33,8 @@ const Mode = {
   IDLE: 'IDLE',
   DRAGGING_FROM_TOOLBOX: 'DRAGGING_FROM_TOOLBOX',
   DRAGGING_DISC: 'DRAGGING_DISC',
+  DRAGGING_SELECTION: 'DRAGGING_SELECTION',
+  MARQUEE: 'MARQUEE',
   PANNING: 'PANNING',
 };
 
@@ -38,8 +45,17 @@ let dragDiscId = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
+// Bulk drag state
+let bulkDragStartWorld = null;
+let bulkDragLastWorld = null;
+
 // Toolbox drag ghost (screen coords)
 let dragGhost = null;
+
+// Marquee state (screen coords)
+let marquee = null;
+let marqueeCtrlHeld = false;
+let marqueePreSelection = null;
 
 // Pan state
 let panStartX = 0;
@@ -63,7 +79,6 @@ function screenToWorld(sx, sy) {
   };
 }
 
-/** Clamp world-space x so the disc doesn't overlap the toolbox strip. */
 function clampWorldX(wx) {
   const minScreenX = TOOLBOX_WIDTH + DISC_RADIUS;
   const minWorldX = minScreenX - state.viewport.x;
@@ -78,6 +93,10 @@ function getMousePos(e) {
     x: e.clientX - rect.left,
     y: e.clientY - rect.top,
   };
+}
+
+function getCanvasWidth() {
+  return canvasEl.width / devicePixelRatio;
 }
 
 // ── Event handlers ──
@@ -99,10 +118,22 @@ function onMouseDown(e) {
     return;
   }
 
-  // Left-click only
   if (e.button !== 0) return;
 
-  // Check toolbox hit first
+  // Check toolbar hit
+  const tbHit = hitTestToolbar(pos.x, pos.y, getCanvasWidth());
+  if (tbHit === 'grid') {
+    setState(toggleGrid(state));
+    return;
+  }
+  if (tbHit === 'delete') {
+    if (state.selection.size > 0) {
+      setState(deleteSelected(state));
+    }
+    return;
+  }
+
+  // Check toolbox hit
   if (pos.x <= TOOLBOX_WIDTH) {
     const toolboxHit = hitTestToolbox(pos.x, pos.y);
     if (toolboxHit) {
@@ -122,19 +153,48 @@ function onMouseDown(e) {
   // Check workspace disc hit
   const world = screenToWorld(pos.x, pos.y);
   const disc = hitTestDisc(state, world.x, world.y);
+
   if (disc) {
+    if (e.ctrlKey) {
+      // Ctrl-click: toggle selection
+      setState(toggleSelectDisc(state, disc.id));
+      return;
+    }
+
+    if (isSelected(state, disc.id) && state.selection.size > 1) {
+      // Drag selected group
+      mode = Mode.DRAGGING_SELECTION;
+      bulkDragStartWorld = { x: world.x, y: world.y };
+      bulkDragLastWorld = { x: world.x, y: world.y };
+      return;
+    }
+
+    // Single disc drag
     mode = Mode.DRAGGING_DISC;
     dragDiscId = disc.id;
     dragOffsetX = disc.x - world.x;
     dragOffsetY = disc.y - world.y;
-    // Bring to front
-    setState(bringToFront(state, disc.id));
+    // Select only this disc and bring to front
+    let s = clearSelection(state);
+    s = selectDisc(s, disc.id);
+    s = bringToFront(s, disc.id);
+    setState(s);
     return;
   }
+
+  // Empty space → marquee
+  mode = Mode.MARQUEE;
+  marqueeCtrlHeld = e.ctrlKey;
+  marqueePreSelection = marqueeCtrlHeld ? [...state.selection] : [];
+  marquee = { x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y };
+  if (!marqueeCtrlHeld) {
+    setState(clearSelection(state));
+  }
+  markDirty();
 }
 
 function updateCursor(pos) {
-  if (mode === Mode.DRAGGING_DISC || mode === Mode.DRAGGING_FROM_TOOLBOX) {
+  if (mode === Mode.DRAGGING_DISC || mode === Mode.DRAGGING_FROM_TOOLBOX || mode === Mode.DRAGGING_SELECTION) {
     canvasEl.style.cursor = 'grabbing';
     return;
   }
@@ -142,7 +202,16 @@ function updateCursor(pos) {
     canvasEl.style.cursor = 'move';
     return;
   }
-  // Idle — check what's under the cursor
+  if (mode === Mode.MARQUEE) {
+    canvasEl.style.cursor = 'crosshair';
+    return;
+  }
+  // Idle
+  const tbHit = hitTestToolbar(pos.x, pos.y, getCanvasWidth());
+  if (tbHit) {
+    canvasEl.style.cursor = 'pointer';
+    return;
+  }
   if (pos.x <= TOOLBOX_WIDTH) {
     const hit = hitTestToolbox(pos.x, pos.y);
     canvasEl.style.cursor = hit ? 'grab' : 'default';
@@ -156,7 +225,6 @@ function updateCursor(pos) {
 function onMouseMove(e) {
   const pos = getMousePos(e);
 
-  // Check if mouse has moved beyond threshold
   const dx = pos.x - mouseDownPos.x;
   const dy = pos.y - mouseDownPos.y;
   if (dx * dx + dy * dy > MOVE_THRESHOLD * MOVE_THRESHOLD) {
@@ -178,6 +246,31 @@ function onMouseMove(e) {
     return;
   }
 
+  if (mode === Mode.DRAGGING_SELECTION) {
+    const world = screenToWorld(pos.x, pos.y);
+    const ddx = world.x - bulkDragLastWorld.x;
+    const ddy = world.y - bulkDragLastWorld.y;
+    bulkDragLastWorld = { x: world.x, y: world.y };
+    setState(moveSelectedDiscs(state, ddx, ddy));
+    updateCursor(pos);
+    return;
+  }
+
+  if (mode === Mode.MARQUEE && marquee) {
+    marquee = { ...marquee, x2: pos.x, y2: pos.y };
+    // Live preview: select discs in marquee rect
+    const w1 = screenToWorld(marquee.x1, marquee.y1);
+    const w2 = screenToWorld(marquee.x2, marquee.y2);
+    const idsInRect = selectDiscsInRect(state, w1.x, w1.y, w2.x, w2.y);
+    const combined = marqueeCtrlHeld
+      ? [...new Set([...marqueePreSelection, ...idsInRect])]
+      : idsInRect;
+    setState(setSelection(state, combined));
+    markDirty();
+    updateCursor(pos);
+    return;
+  }
+
   if (mode === Mode.PANNING) {
     const pdx = pos.x - panStartX;
     const pdy = pos.y - panStartY;
@@ -186,7 +279,6 @@ function onMouseMove(e) {
     return;
   }
 
-  // Idle hover
   updateCursor(pos);
 }
 
@@ -194,11 +286,16 @@ function onMouseUp(e) {
   const pos = getMousePos(e);
 
   if (mode === Mode.DRAGGING_FROM_TOOLBOX && dragGhost) {
-    // Drop disc on workspace if outside toolbox
     if (pos.x > TOOLBOX_WIDTH) {
       const world = screenToWorld(pos.x, pos.y);
-      const wx = clampWorldX(world.x);
-      setState(addDisc(state, dragGhost.type, wx, world.y, dragGhost.side));
+      let wx = clampWorldX(world.x);
+      let wy = world.y;
+      if (state.gridEnabled) {
+        const snapped = snapToGrid(wx, wy);
+        wx = snapped.x;
+        wy = snapped.y;
+      }
+      setState(addDisc(state, dragGhost.type, wx, wy, dragGhost.side));
     }
     dragGhost = null;
     mode = Mode.IDLE;
@@ -208,17 +305,22 @@ function onMouseUp(e) {
   }
 
   if (mode === Mode.DRAGGING_DISC) {
-    // If no significant movement, treat as click (potential double-click for flip)
     if (!hasMoved && dragDiscId != null) {
       const now = Date.now();
       if (lastClickDiscId === dragDiscId && (now - lastClickTime) < DOUBLE_CLICK_MS) {
-        // Double-click → flip
         setState(flipDiscById(state, dragDiscId));
         lastClickDiscId = null;
         lastClickTime = 0;
       } else {
         lastClickDiscId = dragDiscId;
         lastClickTime = now;
+      }
+    } else if (state.gridEnabled && dragDiscId != null) {
+      // Snap on drop
+      const disc = state.discs.find(d => d.id === dragDiscId);
+      if (disc) {
+        const snapped = snapToGrid(disc.x, disc.y);
+        setState(moveDisc(state, dragDiscId, clampWorldX(snapped.x), snapped.y));
       }
     }
     dragDiscId = null;
@@ -227,10 +329,47 @@ function onMouseUp(e) {
     return;
   }
 
+  if (mode === Mode.DRAGGING_SELECTION) {
+    if (state.gridEnabled) {
+      // Snap all selected discs on drop
+      let s = state;
+      for (const id of state.selection) {
+        const disc = s.discs.find(d => d.id === id);
+        if (disc) {
+          const snapped = snapToGrid(disc.x, disc.y);
+          s = moveDisc(s, id, clampWorldX(snapped.x), snapped.y);
+        }
+      }
+      setState(s);
+    }
+    bulkDragStartWorld = null;
+    bulkDragLastWorld = null;
+    mode = Mode.IDLE;
+    updateCursor(pos);
+    return;
+  }
+
+  if (mode === Mode.MARQUEE) {
+    marquee = null;
+    mode = Mode.IDLE;
+    markDirty();
+    updateCursor(pos);
+    return;
+  }
+
   if (mode === Mode.PANNING) {
     mode = Mode.IDLE;
     updateCursor(pos);
     return;
+  }
+}
+
+function onKeyDown(e) {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (state.selection.size > 0) {
+      e.preventDefault();
+      setState(deleteSelected(state));
+    }
   }
 }
 
@@ -241,10 +380,15 @@ function onContextMenu(e) {
 // ── Status bar ──
 function updateStatus() {
   const count = getDiscCount(state);
+  const sel = state.selection.size;
   const leftEl = document.getElementById('status-left');
   const rightEl = document.getElementById('status-right');
-  if (leftEl) leftEl.textContent = '';
-  if (rightEl) rightEl.textContent = `Discs: ${count}`;
+  if (leftEl) leftEl.textContent = state.gridEnabled ? 'Grid: On' : '';
+  if (rightEl) {
+    const parts = [`Discs: ${count}`];
+    if (sel > 0) parts.push(`Selected: ${sel}`);
+    rightEl.textContent = parts.join('  |  ');
+  }
 }
 
 // ── Theme toggle ──
@@ -255,7 +399,6 @@ function updateToggleIcon() {
 
 // ── Init ──
 function init() {
-  // Theme
   initTheme();
   updateToggleIcon();
   const toggleBtn = document.getElementById('theme-toggle');
@@ -264,17 +407,15 @@ function init() {
 
   canvasEl = document.getElementById('workspace-canvas');
 
-  // Prevent context menu on canvas
   canvasEl.addEventListener('contextmenu', onContextMenu);
-
-  // Mouse events
   canvasEl.addEventListener('mousedown', onMouseDown);
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('mouseup', onMouseUp);
+  window.addEventListener('keydown', onKeyDown);
 
-  // Wire up canvas
   setStateProvider(() => state);
   setDragGhostProvider(() => dragGhost);
+  setMarqueeProvider(() => marquee);
   initCanvas(canvasEl);
   startRenderLoop();
   updateStatus();

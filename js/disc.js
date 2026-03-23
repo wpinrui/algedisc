@@ -64,6 +64,26 @@ export function flipDisc(disc) {
   };
 }
 
+const SELECTION_RING_COLOR = '#FACC15';
+const SELECTION_GLOW_COLOR = 'rgba(250, 204, 21, 0.45)';
+
+/** Draw the selection indicator (yellow ring + glow) around a disc. */
+export function drawSelectionRing(ctx, cx, cy, radius) {
+  // Outer glow
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 4, 0, Math.PI * 2);
+  ctx.strokeStyle = SELECTION_GLOW_COLOR;
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Sharp ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = SELECTION_RING_COLOR;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+}
+
 /** Draw a single disc circle with label. Shared by toolbox and workspace rendering. */
 export function drawDiscShape(ctx, cx, cy, radius, style) {
   ctx.beginPath();
