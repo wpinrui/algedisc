@@ -21,13 +21,6 @@ export function addDisc(state, type, x, y, side) {
   };
 }
 
-export function removeDisc(state, id) {
-  return {
-    ...state,
-    discs: state.discs.filter(d => d.id !== id),
-  };
-}
-
 export function moveDisc(state, id, x, y) {
   return {
     ...state,

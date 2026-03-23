@@ -2,14 +2,13 @@
  * Canvas setup, dirty-flag render loop, drawing.
  */
 
-import { getDiscStyle, DISC_RADIUS } from './disc.js';
-import { drawToolbox, drawDiscShape, TOOLBOX_WIDTH } from './toolbox.js';
+import { getDiscStyle, DISC_RADIUS, drawDiscShape } from './disc.js';
+import { drawToolbox, TOOLBOX_WIDTH } from './toolbox.js';
 
 const WS_BG = '#F8FAFB';
 
 let canvas, ctx;
 let dirty = true;
-let rafId = null;
 
 export function initCanvas(canvasEl) {
   canvas = canvasEl;
@@ -33,12 +32,11 @@ function resizeCanvas() {
 export function markDirty() {
   if (!dirty) {
     dirty = true;
-    rafId = requestAnimationFrame(renderFrame);
+    requestAnimationFrame(renderFrame);
   }
 }
 
 function renderFrame() {
-  rafId = null;
   if (!dirty) return;
   dirty = false;
   draw();
@@ -97,11 +95,4 @@ function draw() {
 
   // Draw toolbox on top (fixed screen space)
   drawToolbox(ctx, h);
-}
-
-export function getCanvasSize() {
-  return {
-    width: canvas.width / devicePixelRatio,
-    height: canvas.height / devicePixelRatio,
-  };
 }

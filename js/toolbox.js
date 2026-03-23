@@ -2,7 +2,7 @@
  * Toolbox strip — rendered on canvas, fixed screen position (not affected by pan).
  */
 
-import { DiscType, DiscSide, getDiscStyle, TOOLBOX_DISC_RADIUS } from './disc.js';
+import { DiscType, DiscSide, getDiscStyle, TOOLBOX_DISC_RADIUS, drawDiscShape } from './disc.js';
 
 export const TOOLBOX_WIDTH = 80;
 const TOOLBOX_BG = '#EEF2F7';
@@ -71,24 +71,4 @@ export function drawToolbox(ctx, canvasHeight) {
     const style = getDiscStyle(item.type, item.side);
     drawDiscShape(ctx, item.cx, item.cy, TOOLBOX_DISC_RADIUS, style);
   }
-}
-
-/** Draw a single disc circle with label. Shared by toolbox and workspace rendering. */
-export function drawDiscShape(ctx, cx, cy, radius, style) {
-  // Ring / border
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.fillStyle = style.fill;
-  ctx.fill();
-  ctx.strokeStyle = style.ring;
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // Label
-  const fontSize = Math.round(radius * 0.6);
-  ctx.fillStyle = style.text;
-  ctx.font = `bold ${fontSize}px 'Cambria Math', Cambria, serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(style.label, cx, cy);
 }

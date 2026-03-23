@@ -46,3 +46,21 @@ export function flipDisc(disc) {
     side: disc.side === DiscSide.POSITIVE ? DiscSide.NEGATIVE : DiscSide.POSITIVE,
   };
 }
+
+/** Draw a single disc circle with label. Shared by toolbox and workspace rendering. */
+export function drawDiscShape(ctx, cx, cy, radius, style) {
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = style.fill;
+  ctx.fill();
+  ctx.strokeStyle = style.ring;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  const fontSize = Math.round(radius * 0.6);
+  ctx.fillStyle = style.text;
+  ctx.font = `bold ${fontSize}px 'Cambria Math', Cambria, serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(style.label, cx, cy);
+}

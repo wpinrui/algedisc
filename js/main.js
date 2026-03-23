@@ -11,6 +11,7 @@ import {
   setStateProvider, setDragGhostProvider,
 } from './canvas.js';
 import { hitTestToolbox, TOOLBOX_WIDTH } from './toolbox.js';
+import { DISC_RADIUS } from './disc.js';
 
 // ── State ──
 let state = createState();
@@ -61,6 +62,13 @@ function screenToWorld(sx, sy) {
   };
 }
 
+/** Clamp world-space x so the disc doesn't overlap the toolbox strip. */
+function clampWorldX(wx) {
+  const minScreenX = TOOLBOX_WIDTH + DISC_RADIUS;
+  const minWorldX = minScreenX - state.viewport.x;
+  return Math.max(wx, minWorldX);
+}
+
 let canvasEl = null;
 
 function getMousePos(e) {
@@ -73,6 +81,8 @@ function getMousePos(e) {
 
 // ── Event handlers ──
 function onMouseDown(e) {
+  if (mode !== Mode.IDLE) return;
+
   const pos = getMousePos(e);
   mouseDownPos = { x: pos.x, y: pos.y };
   hasMoved = false;
@@ -161,7 +171,8 @@ function onMouseMove(e) {
 
   if (mode === Mode.DRAGGING_DISC && dragDiscId != null) {
     const world = screenToWorld(pos.x, pos.y);
-    setState(moveDisc(state, dragDiscId, world.x + dragOffsetX, world.y + dragOffsetY));
+    const wx = clampWorldX(world.x + dragOffsetX);
+    setState(moveDisc(state, dragDiscId, wx, world.y + dragOffsetY));
     updateCursor(pos);
     return;
   }
@@ -185,7 +196,8 @@ function onMouseUp(e) {
     // Drop disc on workspace if outside toolbox
     if (pos.x > TOOLBOX_WIDTH) {
       const world = screenToWorld(pos.x, pos.y);
-      setState(addDisc(state, dragGhost.type, world.x, world.y, dragGhost.side));
+      const wx = clampWorldX(world.x);
+      setState(addDisc(state, dragGhost.type, wx, world.y, dragGhost.side));
     }
     dragGhost = null;
     mode = Mode.IDLE;
