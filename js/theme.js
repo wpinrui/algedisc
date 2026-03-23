@@ -10,17 +10,17 @@ let dark = false;
 export function isDark() { return dark; }
 
 export function toggle() {
-  setDark(!dark);
+  setDark(!dark, true);
 }
 
 export function onChange(fn) {
   listeners.push(fn);
 }
 
-function setDark(value) {
+function setDark(value, persist = false) {
   dark = value;
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
+  if (persist) localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light');
   for (const fn of listeners) fn(dark);
 }
 

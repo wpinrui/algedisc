@@ -50,8 +50,8 @@ export function hitTestToolbox(screenX, screenY) {
 
 /** Draw the toolbox strip. */
 export function drawToolbox(ctx, canvasHeight) {
-  const t = isDark() ? THEME.dark : THEME.light;
   const dark = isDark();
+  const t = dark ? THEME.dark : THEME.light;
 
   // Background
   ctx.fillStyle = t.bg;
