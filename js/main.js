@@ -12,6 +12,7 @@ import {
 } from './canvas.js';
 import { hitTestToolbox, TOOLBOX_WIDTH } from './toolbox.js';
 import { DISC_RADIUS } from './disc.js';
+import { initTheme, toggle as toggleTheme, isDark, onChange as onThemeChange } from './theme.js';
 
 // ── State ──
 let state = createState();
@@ -246,8 +247,21 @@ function updateStatus() {
   if (rightEl) rightEl.textContent = `Discs: ${count}`;
 }
 
+// ── Theme toggle ──
+function updateToggleIcon() {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = isDark() ? '\u263E' : '\u263C';
+}
+
 // ── Init ──
 function init() {
+  // Theme
+  initTheme();
+  updateToggleIcon();
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => { toggleTheme(); });
+  onThemeChange(() => { updateToggleIcon(); markDirty(); });
+
   canvasEl = document.getElementById('workspace-canvas');
 
   // Prevent context menu on canvas

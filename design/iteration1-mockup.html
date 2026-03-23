@@ -719,10 +719,177 @@
 </div>
 
 <!-- ============================================================ -->
-<!-- SECTION 6: Colour Reference Table                             -->
+<!-- SECTION 6: Dark Mode                                          -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>6. Dark Mode</h2>
+  <p style="font-size:16px; color:#64748B; margin-bottom:12px; max-width:640px; line-height:1.6;">
+    Auto-detects OS preference via <code>prefers-color-scheme</code>. A toggle in the
+    header allows manual override. Preference is persisted in <code>localStorage</code>.
+  </p>
+
+  <h3>Toggle placement</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px;">
+    A small sun/moon icon button sits in the header, right-aligned before the tab bar.
+    Minimal footprint — no label, just the icon.
+  </p>
+
+  <!-- ── Dark mode disc palette ── -->
+  <h3>Disc palette — dark mode adjustments</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px; max-width:640px; line-height:1.6;">
+    Positive fills are brightened so they don't vanish into the dark workspace.
+    Negative fills are slightly muted (not pure white-pastels) to reduce glare.
+    The hue relationships are preserved — only lightness shifts.
+  </p>
+
+  <div style="display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; background:#0F172A; padding:28px 32px; border-radius:10px; margin-bottom:20px;">
+    <!-- Constant dark mode -->
+    <div style="text-align:center;">
+      <div style="font-size:14px; color:#94A3B8; margin-bottom:8px;">Constant</div>
+      <div style="display:flex; gap:14px;">
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#14B8A6;border:2.5px solid #0D9488;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFFFFF;">+1</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">positive</div>
+        </div>
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#B2F0E6;border:2.5px solid #5EEAD4;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#134E4A;">&minus;1</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">negative</div>
+        </div>
+      </div>
+    </div>
+    <!-- Linear dark mode -->
+    <div style="text-align:center;">
+      <div style="font-size:14px; color:#94A3B8; margin-bottom:8px;">Linear</div>
+      <div style="display:flex; gap:14px;">
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#EA580C;border:2.5px solid #C2410C;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFFFFF;">+x</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">positive</div>
+        </div>
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#FED7AA;border:2.5px solid #FDBA74;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#6B2E0F;">&minus;x</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">negative</div>
+        </div>
+      </div>
+    </div>
+    <!-- Quadratic dark mode -->
+    <div style="text-align:center;">
+      <div style="font-size:14px; color:#94A3B8; margin-bottom:8px;">Quadratic</div>
+      <div style="display:flex; gap:14px;">
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#8B5CF6;border:2.5px solid #7C3AED;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFFFFF;">+x&sup2;</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">positive</div>
+        </div>
+        <div>
+          <div style="width:60px;height:60px;border-radius:50%;background:#DDD6FE;border:2.5px solid #C4B5FD;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#3B1881;">&minus;x&sup2;</div>
+          <div style="font-size:12px;color:#64748B;text-align:center;margin-top:4px;">negative</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dark workspace layout mockup ── -->
+  <h3>Dark Mode Layout</h3>
+  <div style="width:100%; height:480px; border:1px solid #334155; border-radius:8px; overflow:hidden; display:flex; flex-direction:column; background:#0F172A; font-family:var(--font-main);">
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 24px; border-bottom:1px solid #1E293B; background:#0F172A;">
+      <div style="font-size:24px; font-weight:700; color:#F1F5F9;">Algedisc</div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <!-- Dark mode toggle -->
+        <div style="width:32px;height:32px;border-radius:6px;border:1px solid #334155;background:#1E293B;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;" title="Toggle dark mode">&#9790;</div>
+        <div style="display:flex; gap:4px;">
+          <div style="padding:6px 18px; border-radius:6px 6px 0 0; font-size:16px; cursor:pointer; border:1px solid #334155; border-bottom:none; background:#1E293B; color:#F1F5F9; font-weight:600; position:relative; top:1px;">Workspace</div>
+          <div style="padding:6px 18px; border-radius:6px 6px 0 0; font-size:16px; cursor:pointer; border:1px solid #334155; border-bottom:none; background:#0F172A; color:#64748B;">Multiplication Frame</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main area -->
+    <div style="flex:1; display:flex; overflow:hidden;">
+      <!-- Toolbox -->
+      <div style="width:80px; background:#1E293B; border-right:1.5px solid #334155; display:flex; flex-direction:column; align-items:center; padding-top:18px; gap:18px;">
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#64748B; margin-bottom:4px;">Toolbox</div>
+        <div style="width:50px;height:50px;border-radius:50%;background:#14B8A6;border:2.5px solid #0D9488;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#FFF;">+1</div>
+        <div style="width:50px;height:50px;border-radius:50%;background:#EA580C;border:2.5px solid #C2410C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#FFF;">+x</div>
+        <div style="width:50px;height:50px;border-radius:50%;background:#8B5CF6;border:2.5px solid #7C3AED;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#FFF;">+x&sup2;</div>
+      </div>
+
+      <!-- Workspace -->
+      <div style="flex:1; background:#0F172A; position:relative; overflow:hidden;">
+        <!-- Grid overlay -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="darkgrid" width="70" height="70" patternUnits="userSpaceOnUse">
+              <path d="M 70 0 L 0 0 0 70" fill="none" stroke="#1E293B" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#darkgrid)" />
+        </svg>
+
+        <!-- Example discs -->
+        <div style="position:absolute;left:140px;top:70px;width:60px;height:60px;border-radius:50%;background:#14B8A6;border:2.5px solid #0D9488;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFF;">+1</div>
+        <div style="position:absolute;left:210px;top:70px;width:60px;height:60px;border-radius:50%;background:#14B8A6;border:2.5px solid #0D9488;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFF;">+1</div>
+        <div style="position:absolute;left:175px;top:145px;width:60px;height:60px;border-radius:50%;background:#B2F0E6;border:2.5px solid #5EEAD4;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#134E4A;">&minus;1</div>
+        <div style="position:absolute;left:340px;top:90px;width:60px;height:60px;border-radius:50%;background:#EA580C;border:2.5px solid #C2410C;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFF;">+x</div>
+        <div style="position:absolute;left:410px;top:90px;width:60px;height:60px;border-radius:50%;background:#FED7AA;border:2.5px solid #FDBA74;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#6B2E0F;">&minus;x</div>
+        <div style="position:absolute;left:260px;top:220px;width:60px;height:60px;border-radius:50%;background:#8B5CF6;border:2.5px solid #7C3AED;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFF;">+x&sup2;</div>
+        <div style="position:absolute;left:340px;top:220px;width:60px;height:60px;border-radius:50%;background:#DDD6FE;border:2.5px solid #C4B5FD;display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#3B1881;">&minus;x&sup2;</div>
+        <div style="position:absolute;left:490px;top:180px;width:60px;height:60px;border-radius:50%;background:#EA580C;border:2.5px solid #FACC15;box-shadow:0 0 0 3px rgba(250,204,21,0.45);display:flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:18px;font-weight:700;color:#FFF;">+x</div>
+        <div style="position:absolute;font-size:13px;color:#64748B;font-style:italic;left:470px;top:245px;">↑ selected</div>
+      </div>
+
+      <!-- Side panel -->
+      <div style="width:260px; border-left:1px solid #1E293B; background:#0F172A; padding:20px; display:flex; flex-direction:column; gap:16px;">
+        <div style="font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#64748B;">Problem</div>
+        <div style="font-size:15px; color:#94A3B8; line-height:1.5;">
+          Problem panel placeholder (Iteration 3).
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:8px 24px; border-top:1px solid #1E293B; font-size:13px; color:#64748B; display:flex; justify-content:space-between;">
+      <span>Grid: On &nbsp;|&nbsp; Snap: Off</span>
+      <span>Discs: 8</span>
+    </div>
+  </div>
+
+  <!-- ── Dark mode colour reference ── -->
+  <h3 style="margin-top:24px;">Dark Mode Colour Reference</h3>
+  <table style="border-collapse:collapse; font-size:15px; margin-top:10px;">
+    <thead>
+      <tr style="border-bottom:2px solid #334155;">
+        <th style="text-align:left; padding:8px 16px 8px 0;">Element</th>
+        <th style="text-align:left; padding:8px 16px;">Light</th>
+        <th style="text-align:left; padding:8px 16px;">Dark</th>
+        <th style="text-align:left; padding:8px 16px;">Swatch (dark)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px 16px 6px 0;">Workspace bg</td><td style="padding:6px 16px;">#F8FAFB</td><td style="padding:6px 16px;">#0F172A</td><td><span style="display:inline-block;width:40px;height:20px;background:#0F172A;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Toolbox bg</td><td style="padding:6px 16px;">#EEF2F7</td><td style="padding:6px 16px;">#1E293B</td><td><span style="display:inline-block;width:40px;height:20px;background:#1E293B;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Header / footer</td><td style="padding:6px 16px;">#FFFFFF</td><td style="padding:6px 16px;">#0F172A</td><td><span style="display:inline-block;width:40px;height:20px;background:#0F172A;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Borders</td><td style="padding:6px 16px;">#E2E8F0</td><td style="padding:6px 16px;">#1E293B</td><td><span style="display:inline-block;width:40px;height:20px;background:#1E293B;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Grid lines</td><td style="padding:6px 16px;">#CBD5E1</td><td style="padding:6px 16px;">#1E293B</td><td><span style="display:inline-block;width:40px;height:20px;background:#1E293B;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Tab (active)</td><td style="padding:6px 16px;">#F8FAFB</td><td style="padding:6px 16px;">#1E293B</td><td><span style="display:inline-block;width:40px;height:20px;background:#1E293B;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Tab (inactive)</td><td style="padding:6px 16px;">#F1F5F9</td><td style="padding:6px 16px;">#0F172A</td><td><span style="display:inline-block;width:40px;height:20px;background:#0F172A;border:1px solid #334155;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Primary text</td><td style="padding:6px 16px;">#1E293B</td><td style="padding:6px 16px;">#F1F5F9</td><td><span style="display:inline-block;width:40px;height:20px;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Muted text</td><td style="padding:6px 16px;">#94A3B8</td><td style="padding:6px 16px;">#64748B</td><td><span style="display:inline-block;width:40px;height:20px;background:#64748B;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr style="border-top:2px solid #334155;"><td style="padding:6px 16px 6px 0;">Constant + (dark)</td><td style="padding:6px 16px;">#0F6B6E</td><td style="padding:6px 16px;">#14B8A6</td><td><span style="display:inline-block;width:40px;height:20px;background:#14B8A6;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Constant &minus; (dark)</td><td style="padding:6px 16px;">#CCFBF1</td><td style="padding:6px 16px;">#B2F0E6</td><td><span style="display:inline-block;width:40px;height:20px;background:#B2F0E6;border:1px solid #5EEAD4;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Linear + (dark)</td><td style="padding:6px 16px;">#9A3412</td><td style="padding:6px 16px;">#EA580C</td><td><span style="display:inline-block;width:40px;height:20px;background:#EA580C;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Linear &minus; (dark)</td><td style="padding:6px 16px;">#FFEDD5</td><td style="padding:6px 16px;">#FED7AA</td><td><span style="display:inline-block;width:40px;height:20px;background:#FED7AA;border:1px solid #FDBA74;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Quadratic + (dark)</td><td style="padding:6px 16px;">#5B21B6</td><td style="padding:6px 16px;">#8B5CF6</td><td><span style="display:inline-block;width:40px;height:20px;background:#8B5CF6;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Quadratic &minus; (dark)</td><td style="padding:6px 16px;">#EDE9FE</td><td style="padding:6px 16px;">#DDD6FE</td><td><span style="display:inline-block;width:40px;height:20px;background:#DDD6FE;border:1px solid #C4B5FD;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Selection ring</td><td style="padding:6px 16px;">#FACC15</td><td style="padding:6px 16px;">#FACC15</td><td><span style="display:inline-block;width:40px;height:20px;background:#FACC15;border-radius:3px;vertical-align:middle;"></span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: Colour Reference Table (Light)                     -->
 <!-- ============================================================ -->
 <div class="mockup-section" style="border-bottom:none;">
-  <h2>6. Colour Reference</h2>
+  <h2>7. Colour Reference (Light Mode)</h2>
   <table style="border-collapse:collapse; font-size:15px;">
     <thead>
       <tr style="border-bottom:2px solid #E2E8F0;">
