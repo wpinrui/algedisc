@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algedisc — Iteration 1 Visual Mockup</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Typography ── */
+  :root {
+    --font-main: 'Cambria Math', Cambria, 'Times New Roman', serif;
+
+    /* ── Disc palette (max positive/negative contrast) ── */
+    /* Constant (1) — Teal family */
+    --const-pos:       #0F6B6E;   /* deep teal */
+    --const-pos-ring:  #0A5255;
+    --const-neg:       #CCFBF1;   /* very pale mint */
+    --const-neg-ring:  #5EEAD4;
+    --const-neg-text:  #134E4A;
+
+    /* Linear (x) — Orange family */
+    --lin-pos:         #9A3412;   /* deep burnt-orange */
+    --lin-pos-ring:    #7C2D12;
+    --lin-neg:         #FFEDD5;   /* very pale peach */
+    --lin-neg-ring:    #FDBA74;
+    --lin-neg-text:    #6B2E0F;
+
+    /* Quadratic (x²) — Purple family */
+    --quad-pos:        #5B21B6;   /* deep violet */
+    --quad-pos-ring:   #4C1D95;
+    --quad-neg:        #EDE9FE;   /* very pale lavender */
+    --quad-neg-ring:   #C4B5FD;
+    --quad-neg-text:   #3B1881;
+
+    /* ── Workspace ── */
+    --ws-bg:           #F8FAFB;
+    --toolbox-bg:      #EEF2F7;
+    --toolbox-border:  #CBD5E1;
+    --grid-line:       #CBD5E1;
+    --selection-ring:  #FACC15;
+  }
+
+  body {
+    font-family: var(--font-main);
+    background: #FFFFFF;
+    color: #1E293B;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header / title bar ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FFFFFF;
+  }
+  header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+  }
+  .tab {
+    padding: 6px 18px;
+    border-radius: 6px 6px 0 0;
+    font-family: var(--font-main);
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #CBD5E1;
+    border-bottom: none;
+    background: #F1F5F9;
+    color: #64748B;
+  }
+  .tab.active {
+    background: var(--ws-bg);
+    color: #1E293B;
+    font-weight: 600;
+    border-bottom: 1px solid var(--ws-bg);
+    position: relative;
+    top: 1px;
+  }
+
+  /* ── Main layout ── */
+  .main-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── Workspace (canvas mock) ── */
+  .workspace {
+    flex: 1;
+    background: var(--ws-bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Toolbox strip ── */
+  .toolbox {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 80px;
+    background: var(--toolbox-bg);
+    border-right: 1.5px solid var(--toolbox-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 18px;
+    gap: 18px;
+    z-index: 2;
+  }
+  .toolbox-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94A3B8;
+    margin-bottom: 4px;
+  }
+
+  /* ── Grid lines (faint) ── */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    left: 80px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .grid-overlay svg { width: 100%; height: 100%; }
+
+  /* ── Disc component ── */
+  .disc {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-main);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 0.15s;
+    position: relative;
+    border: 2.5px solid transparent;
+  }
+  .disc:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .disc.selected {
+    border-color: var(--selection-ring);
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.45);
+  }
+
+  /* ── Positive discs: deep saturated fill, white text ── */
+  .disc.const-pos  { background: var(--const-pos);  color: #FFFFFF; border-color: var(--const-pos-ring); }
+  .disc.lin-pos    { background: var(--lin-pos);     color: #FFFFFF; border-color: var(--lin-pos-ring); }
+  .disc.quad-pos   { background: var(--quad-pos);    color: #FFFFFF; border-color: var(--quad-pos-ring); }
+
+  /* ── Negative discs: very pale fill, dark text, coloured border ── */
+  .disc.const-neg  { background: var(--const-neg);  color: var(--const-neg-text);  border-color: var(--const-neg-ring); }
+  .disc.lin-neg    { background: var(--lin-neg);     color: var(--lin-neg-text);    border-color: var(--lin-neg-ring); }
+  .disc.quad-neg   { background: var(--quad-neg);    color: var(--quad-neg-text);   border-color: var(--quad-neg-ring); }
+
+  /* ── Discs placed on workspace (absolute positioning) ── */
+  .workspace-disc {
+    position: absolute;
+    z-index: 1;
+  }
+
+  /* ── Right panel (problem panel placeholder for future iterations) ── */
+  .side-panel {
+    width: 260px;
+    border-left: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel-heading {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94A3B8;
+  }
+  .panel-note {
+    font-size: 15px;
+    color: #64748B;
+    line-height: 1.5;
+  }
+
+  /* ── Colour legend ── */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .legend-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+  }
+  .legend-label {
+    font-size: 15px;
+    color: #475569;
+  }
+
+  /* ── Annotation callouts ── */
+  .annotation {
+    position: absolute;
+    font-size: 13px;
+    color: #94A3B8;
+    font-style: italic;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 8px 24px;
+    border-top: 1px solid #E2E8F0;
+    font-size: 13px;
+    color: #94A3B8;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── Mockup-only: section dividers ── */
+  .mockup-section {
+    padding: 32px;
+    border-bottom: 2px dashed #E2E8F0;
+  }
+  .mockup-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #334155;
+  }
+  .mockup-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 16px 0 10px;
+    color: #475569;
+  }
+
+  /* ── Disc showcase grid ── */
+  .disc-showcase {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .disc-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .disc-pair-label {
+    font-size: 14px;
+    color: #64748B;
+  }
+  .disc-pair-row {
+    display: flex;
+    gap: 14px;
+  }
+  .pair-sign {
+    font-size: 12px;
+    color: #94A3B8;
+    text-align: center;
+  }
+
+  /* ── Full page layout mockup ── */
+  .layout-mockup {
+    width: 100%;
+    height: 480px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+  }
+  .layout-mockup .main-area { min-height: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: Disc Colour Scheme                                 -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>1. Disc Colour Scheme</h2>
+  <p style="font-size:16px; color:#64748B; margin-bottom:20px; max-width:600px; line-height:1.6;">
+    Each disc type has its own hue. Positive = deep saturated fill with white text.
+    Negative = very pale pastel fill with dark text and a coloured border.
+    The contrast between positive and negative is intentionally extreme.
+  </p>
+
+  <div class="disc-showcase">
+    <!-- Constant -->
+    <div class="disc-pair">
+      <div class="disc-pair-label">Constant</div>
+      <div class="disc-pair-row">
+        <div style="text-align:center">
+          <div class="disc const-pos">+1</div>
+          <div class="pair-sign">positive</div>
+        </div>
+        <div style="text-align:center">
+          <div class="disc const-neg">&minus;1</div>
+          <div class="pair-sign">negative</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linear -->
+    <div class="disc-pair">
+      <div class="disc-pair-label">Linear</div>
+      <div class="disc-pair-row">
+        <div style="text-align:center">
+          <div class="disc lin-pos">+x</div>
+          <div class="pair-sign">positive</div>
+        </div>
+        <div style="text-align:center">
+          <div class="disc lin-neg">&minus;x</div>
+          <div class="pair-sign">negative</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quadratic -->
+    <div class="disc-pair">
+      <div class="disc-pair-label">Quadratic</div>
+      <div class="disc-pair-row">
+        <div style="text-align:center">
+          <div class="disc quad-pos">+x&sup2;</div>
+          <div class="pair-sign">positive</div>
+        </div>
+        <div style="text-align:center">
+          <div class="disc quad-neg">&minus;x&sup2;</div>
+          <div class="pair-sign">negative</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Greyscale check (simulated)</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:12px;">
+    Even in greyscale, positive reads as dark and negative reads as light within every type.
+  </p>
+  <div class="disc-showcase" style="filter: grayscale(1);">
+    <div class="disc-pair-row">
+      <div class="disc const-pos">+1</div>
+      <div class="disc const-neg">&minus;1</div>
+      <div class="disc lin-pos">+x</div>
+      <div class="disc lin-neg">&minus;x</div>
+      <div class="disc quad-pos">+x&sup2;</div>
+      <div class="disc quad-neg">&minus;x&sup2;</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: Full Page Layout                                   -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>2. Page Layout — Iteration 1</h2>
+  <p style="font-size:16px; color:#64748B; margin-bottom:20px; max-width:600px; line-height:1.6;">
+    Header with title and tab bar. Workspace fills the remaining space.
+    Toolbox is a fixed strip on the left edge of the canvas.
+    Problem panel (right side) appears in Iteration 3 — shown here as a placeholder.
+  </p>
+
+  <div class="layout-mockup">
+    <!-- Header -->
+    <header>
+      <h1>Algedisc</h1>
+      <div class="tab-bar">
+        <div class="tab active">Workspace</div>
+        <div class="tab">Multiplication Frame</div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <div class="main-area">
+      <!-- Workspace -->
+      <div class="workspace">
+        <!-- Toolbox strip -->
+        <div class="toolbox">
+          <div class="toolbox-label">Toolbox</div>
+          <div class="disc const-pos" style="width:50px;height:50px;font-size:16px;">+1</div>
+          <div class="disc lin-pos" style="width:50px;height:50px;font-size:16px;">+x</div>
+          <div class="disc quad-pos" style="width:50px;height:50px;font-size:16px;">+x&sup2;</div>
+        </div>
+
+        <!-- Grid overlay (faint) -->
+        <div class="grid-overlay">
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="70" height="70" patternUnits="userSpaceOnUse">
+                <path d="M 70 0 L 0 0 0 70" fill="none" stroke="#CBD5E1" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <!-- Example discs on workspace -->
+        <div class="disc workspace-disc const-pos" style="left:160px; top:80px;">+1</div>
+        <div class="disc workspace-disc const-pos" style="left:230px; top:80px;">+1</div>
+        <div class="disc workspace-disc const-pos" style="left:300px; top:80px;">+1</div>
+        <div class="disc workspace-disc const-neg" style="left:195px; top:155px;">&minus;1</div>
+        <div class="disc workspace-disc lin-pos"   style="left:380px; top:100px;">+x</div>
+        <div class="disc workspace-disc lin-neg"   style="left:450px; top:100px;">&minus;x</div>
+        <div class="disc workspace-disc quad-pos"  style="left:280px; top:240px;">+x&sup2;</div>
+        <div class="disc workspace-disc quad-neg"  style="left:360px; top:240px;">&minus;x&sup2;</div>
+        <div class="disc workspace-disc lin-pos selected" style="left:520px; top:200px;">+x</div>
+
+        <!-- Annotations -->
+        <div class="annotation" style="left:500px; top:260px;">↑ selected disc (yellow ring)</div>
+        <div class="annotation" style="left:90px; top:390px;">Right-click drag anywhere to pan workspace →</div>
+      </div>
+
+      <!-- Side panel (future — Iteration 3+) -->
+      <div class="side-panel">
+        <div class="panel-heading">Problem</div>
+        <div class="panel-note">
+          Problem generation appears in Iteration 3.
+          This panel is shown as a layout reference.
+        </div>
+
+        <div class="panel-heading" style="margin-top:16px;">Legend</div>
+        <div class="legend">
+          <div class="legend-row">
+            <div class="legend-swatch const-pos" style="font-size:12px; color:#FFF; border-color:var(--const-pos-ring);">+1</div>
+            <div class="legend-swatch const-neg" style="font-size:12px; border-color:var(--const-neg-ring);">&minus;1</div>
+            <div class="legend-label">Constant</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-swatch lin-pos" style="font-size:12px; color:#FFF; border-color:var(--lin-pos-ring);">+x</div>
+            <div class="legend-swatch lin-neg" style="font-size:12px; border-color:var(--lin-neg-ring);">&minus;x</div>
+            <div class="legend-label">Linear</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-swatch quad-pos" style="font-size:11px; color:#FFF; border-color:var(--quad-pos-ring);">+x²</div>
+            <div class="legend-swatch quad-neg" style="font-size:11px; border-color:var(--quad-neg-ring);">&minus;x²</div>
+            <div class="legend-label">Quadratic</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <span>Grid: On &nbsp;|&nbsp; Snap: Off</span>
+      <span>Discs: 9</span>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: Workspace Details                                  -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>3. Workspace Details</h2>
+
+  <h3>Background &amp; Grid</h3>
+  <div style="display:flex; gap:24px; margin-bottom:20px;">
+    <div style="text-align:center;">
+      <div style="width:180px; height:120px; background:var(--ws-bg); border:1px solid #CBD5E1; border-radius:6px; position:relative; overflow:hidden;">
+        <svg style="width:100%;height:100%;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid2" width="70" height="70" patternUnits="userSpaceOnUse">
+              <path d="M 70 0 L 0 0 0 70" fill="none" stroke="#CBD5E1" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid2)" />
+        </svg>
+      </div>
+      <div style="font-size:14px; color:#64748B; margin-top:6px;">Grid enabled</div>
+      <div style="font-size:13px; color:#94A3B8;">bg #F8FAFB · grid #CBD5E1</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="width:180px; height:120px; background:var(--ws-bg); border:1px solid #CBD5E1; border-radius:6px;"></div>
+      <div style="font-size:14px; color:#64748B; margin-top:6px;">Grid disabled</div>
+      <div style="font-size:13px; color:#94A3B8;">Clean background only</div>
+    </div>
+  </div>
+
+  <h3>Toolbox Strip</h3>
+  <div style="display:flex; gap:16px; align-items:flex-start;">
+    <div style="width:80px; background:var(--toolbox-bg); border:1px solid var(--toolbox-border); border-radius:6px; padding:14px 0; display:flex; flex-direction:column; align-items:center; gap:14px;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#94A3B8;">Toolbox</div>
+      <div class="disc const-pos" style="width:50px;height:50px;font-size:15px;">+1</div>
+      <div class="disc lin-pos" style="width:50px;height:50px;font-size:15px;">+x</div>
+      <div class="disc quad-pos" style="width:50px;height:50px;font-size:15px;">+x²</div>
+    </div>
+    <div style="font-size:15px; color:#64748B; line-height:1.6; max-width:400px;">
+      <strong>Background:</strong> #EEF2F7 (slightly cooler than workspace)<br>
+      <strong>Border:</strong> 1.5px solid #CBD5E1 on the right edge<br>
+      <strong>Discs shown:</strong> positive side only (drag spawns a positive copy; double-click to flip after placing)<br>
+      <strong>Fixed position:</strong> does not scroll when panning the workspace
+    </div>
+  </div>
+
+  <h3>Selection Indicator</h3>
+  <div style="display:flex; gap:20px; align-items:center; margin-top:8px;">
+    <div class="disc lin-pos selected">+x</div>
+    <div style="font-size:15px; color:#64748B;">
+      Yellow ring (#FACC15) with soft outer glow — visible against any disc colour.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: Typography                                         -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>4. Typography</h2>
+  <p style="font-size:16px; color:#64748B; margin-bottom:20px; max-width:600px; line-height:1.6;">
+    Cambria Math throughout. It's a Windows system font designed for mathematical
+    typesetting — ideal for an algebra tool. Superscripts, operators, and
+    mathematical symbols render cleanly.
+  </p>
+
+  <div style="display:flex; flex-direction:column; gap:14px;">
+    <div>
+      <span style="font-size:24px; font-weight:700;">Algedisc</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Page title — 24px bold</span>
+    </div>
+    <div>
+      <span style="font-size:16px; font-weight:600;">Workspace &nbsp; Multiplication Frame</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Tab labels — 16px semibold</span>
+    </div>
+    <div>
+      <span style="font-size:18px;">What is 3x + (&minus;2x)?</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Problem text — 18px regular</span>
+    </div>
+    <div>
+      <span style="font-size:16px; color:#475569;">Answer: x</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Solution reveal — 16px</span>
+    </div>
+    <div>
+      <span style="font-size:18px; font-weight:700;">+x² &nbsp; &minus;1 &nbsp; +x</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Disc labels — 18px bold (scales with disc size)</span>
+    </div>
+    <div>
+      <span style="font-size:13px; color:#94A3B8;">Grid: On | Snap: Off | Discs: 9</span>
+      <span style="font-size:14px; color:#94A3B8; margin-left:12px;">Status bar — 13px muted</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: Multiplication Frame (Tab 2)                       -->
+<!-- ============================================================ -->
+<div class="mockup-section">
+  <h2>5. Multiplication Frame — Tab 2</h2>
+  <p style="font-size:16px; color:#64748B; margin-bottom:20px; max-width:640px; line-height:1.6;">
+    Tab 2 is an HTML table where students fill in products. Two modes are shown:
+    expansion (headers pre-filled, body blank) and factorisation (everything blank).
+    Cells use a term-picker popover — no free-text input.
+  </p>
+
+  <!-- ── Expansion example ── -->
+  <h3>Expansion: (x + 2)(x + 3)</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px;">
+    Factor headers are pre-filled. Student clicks each body cell to place the product term.
+  </p>
+
+  <table style="border-collapse:collapse; margin-bottom:28px; font-family:var(--font-main);">
+    <!-- Column headers row -->
+    <tr>
+      <td style="width:56px; height:44px; border:2px solid #CBD5E1; background:#F1F5F9; text-align:center; font-size:15px; color:#94A3B8;">&times;</td>
+      <td style="width:80px; height:44px; border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600; color:#1E293B;">x</td>
+      <td style="width:80px; height:44px; border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600; color:#1E293B;">+3</td>
+    </tr>
+    <!-- Row: x -->
+    <tr>
+      <td style="border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600; color:#1E293B;">x</td>
+      <td style="border:2px solid #CBD5E1; background:#FFFFFF; text-align:center; font-size:18px; font-weight:700; color:var(--quad-pos);">x&sup2;</td>
+      <td style="border:2px solid #CBD5E1; background:#FFFFFF; text-align:center; font-size:18px; font-weight:700; color:var(--lin-pos);">+3x</td>
+    </tr>
+    <!-- Row: +2 -->
+    <tr>
+      <td style="border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600; color:#1E293B;">+2</td>
+      <td style="border:2px solid #CBD5E1; background:#FFFFFF; text-align:center; font-size:18px; font-weight:700; color:var(--lin-pos);">+2x</td>
+      <td style="border:2px solid #CBD5E1; background:#FFFFFF; text-align:center; font-size:18px; font-weight:700; color:var(--const-pos);">+6</td>
+    </tr>
+  </table>
+
+  <!-- ── Factorisation example ── -->
+  <h3>Factorisation: x&sup2; + 5x + 6</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px;">
+    All cells start blank. Student fills headers (factors) and body (products).
+    Dotted borders indicate empty cells awaiting input.
+  </p>
+
+  <table style="border-collapse:collapse; margin-bottom:28px; font-family:var(--font-main);">
+    <tr>
+      <td style="width:56px; height:44px; border:2px solid #CBD5E1; background:#F1F5F9; text-align:center; font-size:15px; color:#94A3B8;">&times;</td>
+      <td style="width:80px; height:44px; border:2px dashed #CBD5E1; background:#FAFAFA; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+      <td style="width:80px; height:44px; border:2px dashed #CBD5E1; background:#FAFAFA; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+    </tr>
+    <tr>
+      <td style="border:2px dashed #CBD5E1; background:#FAFAFA; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+      <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center;"></td>
+      <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center;"></td>
+    </tr>
+    <tr>
+      <td style="border:2px dashed #CBD5E1; background:#FAFAFA; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+      <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center;"></td>
+      <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center;"></td>
+    </tr>
+  </table>
+
+  <!-- ── Term picker popover ── -->
+  <h3>Term Picker Popover</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px;">
+    Clicking any cell opens this popover. One tap places the term; no typing required.
+  </p>
+
+  <div style="display:inline-flex; gap:6px; padding:10px 14px; background:#FFFFFF; border:1.5px solid #CBD5E1; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.10);">
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--const-pos-ring); border-radius:6px; background:var(--const-pos); color:#FFF; cursor:pointer;">+1</button>
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--const-neg-ring); border-radius:6px; background:var(--const-neg); color:var(--const-neg-text); cursor:pointer;">&minus;1</button>
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--lin-pos-ring); border-radius:6px; background:var(--lin-pos); color:#FFF; cursor:pointer;">+x</button>
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--lin-neg-ring); border-radius:6px; background:var(--lin-neg); color:var(--lin-neg-text); cursor:pointer;">&minus;x</button>
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--quad-pos-ring); border-radius:6px; background:var(--quad-pos); color:#FFF; cursor:pointer;">+x&sup2;</button>
+    <button style="font-family:var(--font-main); font-size:16px; font-weight:700; width:48px; height:40px; border:1.5px solid var(--quad-neg-ring); border-radius:6px; background:var(--quad-neg); color:var(--quad-neg-text); cursor:pointer;">&minus;x&sup2;</button>
+  </div>
+
+  <!-- ── Full Tab 2 layout mockup ── -->
+  <h3 style="margin-top:28px;">Full Tab 2 Layout</h3>
+  <p style="font-size:15px; color:#64748B; margin-bottom:14px;">
+    Same header and side panel as Tab 1. The canvas is replaced by the HTML frame table, centred in the content area.
+  </p>
+
+  <div class="layout-mockup" style="height:420px;">
+    <header>
+      <h1>Algedisc</h1>
+      <div class="tab-bar">
+        <div class="tab">Workspace</div>
+        <div class="tab active">Multiplication Frame</div>
+      </div>
+    </header>
+    <div class="main-area">
+      <!-- Frame content area -->
+      <div style="flex:1; background:var(--ws-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;">
+        <div style="font-size:18px; color:#1E293B; font-weight:600;">Expand (x + 2)(x + 3)</div>
+        <table style="border-collapse:collapse; font-family:var(--font-main);">
+          <tr>
+            <td style="width:52px; height:42px; border:2px solid #CBD5E1; background:#F1F5F9; text-align:center; font-size:15px; color:#94A3B8;">&times;</td>
+            <td style="width:72px; height:42px; border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600;">x</td>
+            <td style="width:72px; height:42px; border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600;">+3</td>
+          </tr>
+          <tr>
+            <td style="border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600;">x</td>
+            <td style="border:2px solid #CBD5E1; background:#FFFFFF; text-align:center; font-size:18px; font-weight:700; color:var(--quad-pos);">x&sup2;</td>
+            <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+          </tr>
+          <tr>
+            <td style="border:2px solid #CBD5E1; background:#EEF2F7; text-align:center; font-size:18px; font-weight:600;">+2</td>
+            <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+            <td style="border:2px dashed #CBD5E1; background:#FFFFFF; text-align:center; font-size:15px; color:#94A3B8;">?</td>
+          </tr>
+        </table>
+        <div style="font-size:14px; color:#94A3B8; font-style:italic;">One cell filled, two remaining — click a cell to place a term</div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="side-panel">
+        <div class="panel-heading">Problem</div>
+        <div style="font-size:18px; font-weight:600; color:#1E293B;">Expand (x + 2)(x + 3)</div>
+        <button style="font-family:var(--font-main); font-size:15px; padding:8px 16px; border:1.5px solid #CBD5E1; border-radius:6px; background:#FFFFFF; color:#475569; cursor:pointer;">Check Answer</button>
+        <div class="panel-heading" style="margin-top:12px;">Legend</div>
+        <div class="legend">
+          <div class="legend-row">
+            <div class="legend-swatch const-pos" style="font-size:12px; color:#FFF; border-color:var(--const-pos-ring);">+1</div>
+            <div class="legend-swatch const-neg" style="font-size:12px; border-color:var(--const-neg-ring);">&minus;1</div>
+            <div class="legend-label">Constant</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-swatch lin-pos" style="font-size:12px; color:#FFF; border-color:var(--lin-pos-ring);">+x</div>
+            <div class="legend-swatch lin-neg" style="font-size:12px; border-color:var(--lin-neg-ring);">&minus;x</div>
+            <div class="legend-label">Linear</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-swatch quad-pos" style="font-size:11px; color:#FFF; border-color:var(--quad-pos-ring);">+x&sup2;</div>
+            <div class="legend-swatch quad-neg" style="font-size:11px; border-color:var(--quad-neg-ring);">&minus;x&sup2;</div>
+            <div class="legend-label">Quadratic</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <span>Tab: Multiplication Frame</span>
+      <span>Problem: Expansion</span>
+    </footer>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: Colour Reference Table                             -->
+<!-- ============================================================ -->
+<div class="mockup-section" style="border-bottom:none;">
+  <h2>6. Colour Reference</h2>
+  <table style="border-collapse:collapse; font-size:15px;">
+    <thead>
+      <tr style="border-bottom:2px solid #E2E8F0;">
+        <th style="text-align:left; padding:8px 16px 8px 0;">Element</th>
+        <th style="text-align:left; padding:8px 16px;">Hex</th>
+        <th style="text-align:left; padding:8px 16px;">Swatch</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px 16px 6px 0;">Constant +</td><td style="padding:6px 16px;">#0F6B6E</td><td><span style="display:inline-block;width:40px;height:20px;background:#0F6B6E;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Constant &minus;</td><td style="padding:6px 16px;">#CCFBF1</td><td><span style="display:inline-block;width:40px;height:20px;background:#CCFBF1;border:1px solid #5EEAD4;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Linear +</td><td style="padding:6px 16px;">#9A3412</td><td><span style="display:inline-block;width:40px;height:20px;background:#9A3412;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Linear &minus;</td><td style="padding:6px 16px;">#FFEDD5</td><td><span style="display:inline-block;width:40px;height:20px;background:#FFEDD5;border:1px solid #FDBA74;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Quadratic +</td><td style="padding:6px 16px;">#5B21B6</td><td><span style="display:inline-block;width:40px;height:20px;background:#5B21B6;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Quadratic &minus;</td><td style="padding:6px 16px;">#EDE9FE</td><td><span style="display:inline-block;width:40px;height:20px;background:#EDE9FE;border:1px solid #C4B5FD;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr style="border-top:1px solid #E2E8F0;"><td style="padding:6px 16px 6px 0;">Workspace bg</td><td style="padding:6px 16px;">#F8FAFB</td><td><span style="display:inline-block;width:40px;height:20px;background:#F8FAFB;border:1px solid #CBD5E1;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Toolbox bg</td><td style="padding:6px 16px;">#EEF2F7</td><td><span style="display:inline-block;width:40px;height:20px;background:#EEF2F7;border:1px solid #CBD5E1;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Grid lines</td><td style="padding:6px 16px;">#CBD5E1</td><td><span style="display:inline-block;width:40px;height:20px;background:#CBD5E1;border-radius:3px;vertical-align:middle;"></span></td></tr>
+      <tr><td style="padding:6px 16px 6px 0;">Selection ring</td><td style="padding:6px 16px;">#FACC15</td><td><span style="display:inline-block;width:40px;height:20px;background:#FACC15;border-radius:3px;vertical-align:middle;"></span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
