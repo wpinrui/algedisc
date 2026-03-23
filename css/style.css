@@ -1,0 +1,91 @@
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Typography ── */
+:root {
+  --font-main: 'Cambria Math', Cambria, 'Times New Roman', serif;
+}
+
+body {
+  font-family: var(--font-main);
+  background: #FFFFFF;
+  color: #1E293B;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px 24px 0;
+  border-bottom: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  flex-shrink: 0;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  padding-bottom: 10px;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  padding: 6px 18px;
+  border-radius: 6px 6px 0 0;
+  font-family: var(--font-main);
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #CBD5E1;
+  border-bottom: none;
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.tab.active {
+  background: #F8FAFB;
+  color: #1E293B;
+  font-weight: 600;
+  border-bottom: 1px solid #F8FAFB;
+  position: relative;
+  top: 1px;
+}
+
+.tab[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Main layout ── */
+.main-area {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+#workspace-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Footer ── */
+footer {
+  padding: 8px 24px;
+  border-top: 1px solid #E2E8F0;
+  font-size: 13px;
+  color: #94A3B8;
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
