@@ -19,9 +19,9 @@ body {
 /* ── Header ── */
 header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 10px 24px;
+  padding: 10px 24px 0;
   border-bottom: 1px solid #E2E8F0;
   background: #FFFFFF;
   flex-shrink: 0;
