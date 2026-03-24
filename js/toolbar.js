@@ -4,7 +4,6 @@
  */
 
 import { isDark } from './theme.js';
-import { TOOLBOX_WIDTH } from './toolbox.js';
 
 export const TOOLBAR_MARGIN = 12;
 export const TOOLBAR_HEIGHT = 48;
@@ -16,13 +15,13 @@ const TOOLBAR_WIDTH = TOOLBAR_PADDING * 2 + BTN_SIZE * 2 + BTN_GAP;
 
 const THEME = {
   light: {
-    bg: '#FFFFFF', border: '#CBD5E1', shadow: 'rgba(0,0,0,0.06)',
+    bg: '#FFFFFF', border: '#CBD5E1',
     btnBg: '#FFFFFF', btnBorder: '#CBD5E1', btnIcon: '#94A3B8',
     gridOnBg: '#EEF2F7', gridOnBorder: '#3B82F6', gridOnIcon: '#3B82F6',
     delActiveBg: '#FEF2F2', delActiveBorder: '#EF4444', delActiveIcon: '#EF4444',
   },
   dark: {
-    bg: '#1E293B', border: '#334155', shadow: 'rgba(0,0,0,0.3)',
+    bg: '#1E293B', border: '#334155',
     btnBg: '#0F172A', btnBorder: '#334155', btnIcon: '#64748B',
     gridOnBg: '#0F172A', gridOnBorder: '#60A5FA', gridOnIcon: '#60A5FA',
     delActiveBg: '#1C1917', delActiveBorder: '#EF4444', delActiveIcon: '#EF4444',
@@ -121,7 +120,3 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-/** Get canvas width for external callers. */
-export function getToolbarCanvasWidth(canvasEl) {
-  return canvasEl.width / devicePixelRatio;
-}

@@ -6,7 +6,7 @@ import { getDiscStyle, DISC_RADIUS, drawDiscShape, drawSelectionRing } from './d
 import { drawToolbox, TOOLBOX_WIDTH } from './toolbox.js';
 import { isDark } from './theme.js';
 import { drawGrid } from './grid.js';
-import { drawToolbar, TOOLBAR_HEIGHT, TOOLBAR_MARGIN } from './toolbar.js';
+import { drawToolbar } from './toolbar.js';
 
 const WS_BG_LIGHT = '#F8FAFB';
 const WS_BG_DARK = '#0F172A';

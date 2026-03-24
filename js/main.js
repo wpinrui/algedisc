@@ -5,7 +5,7 @@
 import {
   createState, addDisc, moveDisc, moveSelectedDiscs, flipDiscById,
   bringToFront, setViewport, hitTestDisc, getDiscCount,
-  selectDisc, deselectDisc, toggleSelectDisc, setSelection,
+  selectDisc, toggleSelectDisc, setSelection,
   clearSelection, isSelected, selectionSize, selectDiscsInRect,
   deleteSelected, toggleGrid,
 } from './workspace.js';
@@ -14,7 +14,7 @@ import {
   setStateProvider, setDragGhostProvider, setMarqueeProvider,
 } from './canvas.js';
 import { hitTestToolbox, TOOLBOX_WIDTH } from './toolbox.js';
-import { hitTestToolbar, getToolbarCanvasWidth } from './toolbar.js';
+import { hitTestToolbar } from './toolbar.js';
 import { DISC_RADIUS } from './disc.js';
 import { initTheme, toggle as toggleTheme, isDark, onChange as onThemeChange } from './theme.js';
 import { snapToGrid } from './grid.js';
@@ -46,7 +46,6 @@ let dragOffsetX = 0;
 let dragOffsetY = 0;
 
 // Bulk drag state
-let bulkDragStartWorld = null;
 let bulkDragLastWorld = null;
 
 // Toolbox drag ghost (screen coords)
@@ -164,7 +163,6 @@ function onMouseDown(e) {
     if (isSelected(state, disc.id) && selectionSize(state) > 1) {
       // Drag selected group
       mode = Mode.DRAGGING_SELECTION;
-      bulkDragStartWorld = { x: world.x, y: world.y };
       bulkDragLastWorld = { x: world.x, y: world.y };
       return;
     }
@@ -343,7 +341,6 @@ function onMouseUp(e) {
       }
       setState(s);
     }
-    bulkDragStartWorld = null;
     bulkDragLastWorld = null;
     mode = Mode.IDLE;
     updateCursor(pos);
