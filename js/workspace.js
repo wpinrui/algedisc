@@ -102,9 +102,6 @@ export function selectionSize(state) {
   return Object.keys(state.selection).length;
 }
 
-export function getSelectedIds(state) {
-  return Object.keys(state.selection).map(Number);
-}
 
 /** Select all discs whose center falls within the given world-space rect. */
 export function selectDiscsInRect(state, x1, y1, x2, y2) {
